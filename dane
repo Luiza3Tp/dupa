@@ -1,0 +1,124 @@
+package com.example.sortownik;
+
+import android.os.Bundle;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Spinner;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
+public class MainActivity extends AppCompatActivity {
+    private EditText editod,wartoscDo,ilosc;
+    private TextView wypisz;
+    private Button losuj,sortuj;
+    private Spinner my_items;
+
+    private List<Integer> wylosowane = new ArrayList<>();
+    private  String  wybraneSortowane = "Bombelkowe";
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
+        setContentView(R.layout.activity_main);
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
+        });
+        Spinner spinner = findViewById(R.id.my_items);
+        editod = findViewById(R.id.od);
+        wartoscDo = findViewById(R.id.wartoscDo);
+        ilosc = findViewById(R.id.ilosc);
+        wypisz = findViewById(R.id.wypisz);
+        losuj  = findViewById(R.id.losuj);
+        sortuj = findViewById(R.id.sortuj);
+        losuj.setOnClickListener(v->losujLiczby());
+        sortuj.setOnClickListener(v->sortujLiczby());
+
+
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
+                this,
+                R.array.my_items,
+                android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(adapter);
+
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                wybraneSortowane = parent.getItemAtPosition(position).toString();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+
+            losuj.setOnClickListener(new View.OnClickListener(){
+            private void losujLiczby() {
+                    wylosowane.clear();
+                    int od = Integer.parseInt(editod.getText().toString());
+                    int doo = Integer.parseInt(wartoscDo.getText().toString());
+                    int ilosci = Integer.parseInt(ilosc.getText().toString());
+
+                    Random rand = new Random();
+                    for (int i = 0; i < ilosci; i++) {
+                        int liczba = rand.nextInt(doo - od + 1) + od;
+                        wylosowane.add(liczba);
+                    }
+                    wypisz.setText(wylosowane.toString());
+                })
+
+            }
+            private void sortujLiczby(){
+                if(wybraneSortowane.equals("Bombelkowe")){
+                    bubbleSort(wylosowane);
+                } else if (wybraneSortowane.equals("Przez wybór")) {
+                    selectionSort(wylosowane);
+                }
+                wypisz.setText(wylosowane.toString());
+            }
+            private void bubbleSort(List<Integer> lista){
+                int n = lista.size();
+                for(int i = 0; i<n -1; i++){
+                    for(int j =0; j<n-i-1;j++){
+                        if (lista.get(j)>lista.get(j+1)){
+                            int temp = lista.get(j);
+                            lista.set(j,lista.get(j+1));
+                            lista.set(j+1,temp);
+                        }
+                    }
+                }
+            }
+
+            private void selectionSort(List<Integer>list){
+                int n = list.size();
+                for(int i =0;i<n-1;i++){
+                    int minIdx = i;
+                    for(int j =i+1;j<n;j++){
+                        if(list.get(j)< list.get(minIdx)){
+                            minIdx = j;
+                        }
+                    }
+                    int temp = list.get(minIdx);
+                    list.set(minIdx,list.get(i));
+                    list.set(i,temp);
+                }
+            }
+        });
+
+    }
+}
